@@ -1,0 +1,198 @@
+{% extends 'polls/base.html' %}
+{% load custom_filters %}
+
+{% block title %}
+<title>Donor Profile - {{ donor.name }}</title>
+{% endblock %}
+
+{% block contents %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Donor Info and Profile Update -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">{{ donor.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-circle fa-5x text-danger"></i>
+                    </div>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item"><strong>Blood Group:</strong> {{ donor.blood_group }}</li>
+                        <li class="list-group-item"><strong>Gender:</strong> {{ donor.gender }}</li>
+                        <li class="list-group-item"><strong>Age:</strong> {{ donor.date_of_birth|timesince }}</li>
+                        <li class="list-group-item"><strong>Email:</strong> {{ donor.email }}</li>
+                        <li class="list-group-item"><strong>Phone:</strong> {{ donor.mobile }}</li>
+                        <li class="list-group-item"><strong>Location:</strong> {{ donor.city }}, {{ donor.state }}</li>
+                    </ul>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-danger" type="button" data-bs-toggle="collapse" data-bs-target="#updateProfileForm">
+                            Update Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Next Eligible Date Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Next Eligible Donation</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if next_eligible_date %}
+                        {% if next_eligible_date > today %}
+                            <h3 class="text-primary">{{ next_eligible_date }}</h3>
+                            <p class="text-muted">{{ next_eligible_date|timeuntil }} from now</p>
+                            <div class="progress mt-2">
+                                {% with days_passed=donor.last_donate_date|timesince:today days_total=56 %}
+                                {% with percent=days_passed|floatformat:0|default:0 %}
+                                <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: {{ percent }}%" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">{{ percent }}%</div>
+                                {% endwith %}
+                                {% endwith %}
+                            </div>
+                        {% else %}
+                            <h3 class="text-success">You can donate now!</h3>
+                            <a href="#" class="btn btn-success mt-2">Schedule Donation</a>
+                        {% endif %}
+                    {% else %}
+                        <h3>No previous donations</h3>
+                        <p>You can donate anytime!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Donation History and Health Tips -->
+        <div class="col-md-8">
+            <!-- Profile Update Form -->
+            <div class="collapse mb-4" id="updateProfileForm">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Update Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="weight" class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control" id="weight" name="weight" value="{{ donor.weight }}" step="0.01">
+                            </div>
+                            
+                            <h5>Medical Conditions</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="any_disease" name="any_disease" {% if donor.any_disease %}checked{% endif %}>
+                                <label class="form-check-label" for="any_disease">Any Disease</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="allergies" name="allergies" {% if donor.allergies %}checked{% endif %}>
+                                <label class="form-check-label" for="allergies">Allergies</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="cardiac" name="cardiac" {% if donor.cardiac %}checked{% endif %}>
+                                <label class="form-check-label" for="cardiac">Cardiac Issues</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="bleeding_disorder" name="bleeding_disorder" {% if donor.bleeding_disorder %}checked{% endif %}>
+                                <label class="form-check-label" for="bleeding_disorder">Bleeding Disorder</label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="hbsAg_hcv_hIV" name="hbsAg_hcv_hIV" {% if donor.hbsAg_hcv_hIV %}checked{% endif %}>
+                                <label class="form-check-label" for="hbsAg_hcv_hIV">HbsAg/HCV/HIV</label>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Donation History Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Donation History</h5>
+                </div>
+                <div class="card-body">
+                    {% if donations %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Blood Bag No.</th>
+                                        <th>Hemoglobin</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for donation in donations %}
+                                    <tr>
+                                        <td>{{ donation.donation_date }}</td>
+                                        <td>{{ donation.blood_bag_number }}</td>
+                                        <td>{{ donation.hemoglobin }} g/dL</td>
+                                        <td>{{ donation.quantity }} ml</td>
+                                        <td>
+                                            {% if donation.was_successful %}
+                                            <span class="badge bg-success">Successful</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Unsuccessful</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">No donation history yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Health Tips Card -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Health Tips for Blood Donors</h5>
+                </div>
+                <div class="card-body">
+                    <div id="tipCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for tip in health_tips %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <div class="p-4 text-center">
+                                        <i class="fas fa-heartbeat fa-3x text-danger mb-3"></i>
+                                        <p class="lead">{{ tip }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#tipCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#tipCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>All Tips:</h6>
+                        <ul class="list-group">
+                            {% for tip in health_tips %}
+                                <li class="list-group-item">{{ tip }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

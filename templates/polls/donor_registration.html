@@ -1,0 +1,93 @@
+{% extends 'polls/base.html' %} {% block title %}<title>
+  Registration Form
+</title>
+{% endblock %} {% block contents %} {% load static %}
+<style>
+  .image {
+    width: 150px;
+    height: 150px;
+  }
+
+  .width-border {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #d9534f;
+  }
+  .containers {
+    flex-direction: column;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  .form-group label {
+    font-weight: 500;
+    color: #333;
+  }
+  .form-group input[type="date"] {
+    padding: 0.375rem 0.75rem;
+  }
+  .form-group .help-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+  }
+  .form-group .errorlist {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    list-style: none;
+    padding-left: 0;
+  }
+</style>
+
+<div class="containers">
+  <div class="p-5">
+    <div class="shadow-lg p-5 mb-3 bg-white width-border">
+      <form action="{% url 'donor_list' %}" method="post" novalidate>
+        <div class="text-center">
+          <img src="{% static 'images/registration.jpg' %}" class="image" />
+        </div>
+        <h4 class="text-center pt-4 text-danger text-uppercase">
+          Registration Form
+        </h4>
+        {% csrf_token %}
+        
+        {% for field in forms %}
+        <div class="form-group">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.help_text %}
+          <small class="help-text">{{ field.help_text }}</small>
+          {% endif %}
+          {% if field.errors %}
+          <div class="errorlist">
+            {% for error in field.errors %}
+            <div>{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-danger btn-lg">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Set max date to today for date inputs
+  document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+      input.max = today;
+    });
+  });
+</script>
+
+{% endblock %}

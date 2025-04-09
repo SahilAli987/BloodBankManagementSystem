@@ -1,0 +1,48 @@
+{% extends 'polls/base.html' %}
+{% block title %}
+<title>Record Donation</title>
+{% endblock %}
+
+{% block contents %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Record New Donation - {{ donor.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="blood_volume" class="form-label">Blood Volume (ml)</label>
+                            {{ form.blood_volume }}
+                            {% if form.blood_volume.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.blood_volume.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.notes.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Record Donation</button>
+                            <a href="{% url 'donor_history' donor.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
