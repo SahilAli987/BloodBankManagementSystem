@@ -48,7 +48,7 @@
                             <div class="progress mt-2">
                                 {% with days_passed=donor.last_donate_date|timesince:today days_total=56 %}
                                 {% with percent=days_passed|floatformat:0|default:0 %}
-                                <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: {{ percent }}" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">{{ percent }}%</div>
+                                <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: {{ percent }}%" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">{{ percent }}%</div>
                                 {% endwith %}
                                 {% endwith %}
                             </div>
